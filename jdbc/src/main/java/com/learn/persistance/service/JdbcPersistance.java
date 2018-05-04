@@ -1,8 +1,7 @@
-package com.learn.persistance.jdbc;
+package com.learn.persistance.service;
 
 import com.learn.persistance.model.Book;
 
-import javax.xml.transform.Result;
 import java.sql.*;
 
 public class JdbcPersistance {
