@@ -5,40 +5,32 @@
 
 package com.learn.persistance.model;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-public class CD implements Serializable {
-
-    @Id
-    @GeneratedValue
-    private Long id;
-
-    @Column(length = 100)
-    private String title;
-
-    @Column(length = 3000)
-    private String description;
-
-    @Column(name = "unit_cost")
-    private Float unitCost;
+public class CD extends Item {
 
     @Column(name = "total_duration")
     private Float totalDuration;
 
     private String genre;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     @JoinColumn(name = "cd_fk")
     private Set<Musician> musicians = new HashSet<Musician>();
 
     public CD() {
+    }
+
+    public CD(String title, String description, Float unitCost, Float totalDuration, String genre) {
+        super.setTitle(title);
+        super.setDescription(description);
+        super.setUnitCost(unitCost);
+        this.totalDuration = totalDuration;
+        this.genre = genre;
+        this.musicians = musicians;
     }
 
     public Long getId() {
@@ -100,45 +92,37 @@ public class CD implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-
         if (!(o instanceof CD)) return false;
+        if (!super.equals(o)) return false;
 
         CD cd = (CD) o;
 
-        return new EqualsBuilder()
-                .append(getId(), cd.getId())
-                .append(getTitle(), cd.getTitle())
-                .append(getDescription(), cd.getDescription())
-                .append(getUnitCost(), cd.getUnitCost())
-                .append(getTotalDuration(), cd.getTotalDuration())
-                .append(getGenre(), cd.getGenre())
-                .append(getMusicians(), cd.getMusicians())
-                .isEquals();
+        if (getTotalDuration() != null ? !getTotalDuration().equals(cd.getTotalDuration()) : cd.getTotalDuration() != null)
+            return false;
+        if (getGenre() != null ? !getGenre().equals(cd.getGenre()) : cd.getGenre() != null) return false;
+        return getMusicians() != null ? getMusicians().equals(cd.getMusicians()) : cd.getMusicians() == null;
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(getId())
-                .append(getTitle())
-                .append(getDescription())
-                .append(getUnitCost())
-                .append(getTotalDuration())
-                .append(getGenre())
-                .append(getMusicians())
-                .toHashCode();
+        int result = super.hashCode();
+        result = 31 * result + (getTotalDuration() != null ? getTotalDuration().hashCode() : 0);
+        result = 31 * result + (getGenre() != null ? getGenre().hashCode() : 0);
+        result = 31 * result + (getMusicians() != null ? getMusicians().hashCode() : 0);
+        return result;
     }
+
 
     @Override
     public String toString() {
         return "CD{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", unitCost=" + unitCost +
-                ", totalDuration=" + totalDuration +
+                "totalDuration=" + totalDuration +
                 ", genre='" + genre + '\'' +
                 ", musicians=" + musicians +
-                '}';
+                ", id=" + getId() +
+                ", title='" + getTitle() + '\'' +
+                ", description='" + getDescription() + '\'' +
+                ", unitCost=" + getUnitCost() +
+                "} " + super.toString();
     }
 }

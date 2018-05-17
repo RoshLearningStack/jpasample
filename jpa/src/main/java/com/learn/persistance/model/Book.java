@@ -5,64 +5,36 @@
 
 package com.learn.persistance.model;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import javax.persistence.*;
-import java.io.Serializable;
+import java.util.Date;
 
 @Entity
-public class Book implements Serializable {
+@NamedQueries({
+        @NamedQuery(name = Book.FIND_ALL, query = "select b from Book b")
+})
+public class Book extends Item {
+    public static final String FIND_ALL = "Book.All";
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-    private String title;
-    private String description;
-    @Column(name = "unit_cost", length = 50)
-    private Float unitCost;
+    @Column(length = 15)
     private String isbn;
 
-    public Book() {}
+    @Column(name = "nb_of_pages")
+    private Integer nbOfPages;
 
-    public Book(Long id, String title, String desctription, Float unitCost, String isbn) {
-        this.id = id;
-        this.title = title;
-        this.description = desctription;
-        this.unitCost = unitCost;
+    @Column(name = "publication_date")
+    @Temporal(TemporalType.DATE)
+    private Date publicationDate;
+
+    public Book() {
+    }
+
+    public Book(String title, String description, Float unitCost, String isbn, Integer nbOfPages, Date publicationDate) {
+        super.setTitle(title);
+        super.setDescription(description);
+        super.setUnitCost(unitCost);
         this.isbn = isbn;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Float getUnitCost() {
-        return unitCost;
-    }
-
-    public void setUnitCost(Float unitCost) {
-        this.unitCost = unitCost;
+        this.nbOfPages = nbOfPages;
+        this.publicationDate = publicationDate;
     }
 
     public String getIsbn() {
@@ -76,40 +48,32 @@ public class Book implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-
         if (!(o instanceof Book)) return false;
+        if (!super.equals(o)) return false;
 
         Book book = (Book) o;
 
-        return new EqualsBuilder()
-                .append(getId(), book.getId())
-                .append(getTitle(), book.getTitle())
-                .append(getDescription(), book.getDescription())
-                .append(getUnitCost(), book.getUnitCost())
-                .append(getIsbn(), book.getIsbn())
-                .isEquals();
+        if (getIsbn() != null ? !getIsbn().equals(book.getIsbn()) : book.getIsbn() != null) return false;
+        if (nbOfPages != null ? !nbOfPages.equals(book.nbOfPages) : book.nbOfPages != null) return false;
+        return publicationDate != null ? publicationDate.equals(book.publicationDate) : book.publicationDate == null;
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(getId())
-                .append(getTitle())
-                .append(getDescription())
-                .append(getUnitCost())
-                .append(getIsbn())
-                .toHashCode();
+        int result = super.hashCode();
+        result = 31 * result + (getIsbn() != null ? getIsbn().hashCode() : 0);
+        result = 31 * result + (nbOfPages != null ? nbOfPages.hashCode() : 0);
+        result = 31 * result + (publicationDate != null ? publicationDate.hashCode() : 0);
+        return result;
     }
+
 
     @Override
     public String toString() {
         return "Book{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", unitCost=" + unitCost +
-                ", isbn='" + isbn + '\'' +
-                '}';
+                "isbn='" + isbn + '\'' +
+                ", nbOfPages=" + nbOfPages +
+                ", publicationDate=" + publicationDate +
+                "} " + super.toString();
     }
-
 }

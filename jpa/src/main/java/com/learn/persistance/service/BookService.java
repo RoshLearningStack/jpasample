@@ -8,69 +8,94 @@ package com.learn.persistance.service;
 import com.learn.persistance.model.Book;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
-import javax.transaction.Transactional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class BookService extends BaseService {
+    private static final Logger LOGGER  = Logger.getLogger(BookService.class.getName());
 
-    public Book createBook(String title, String description, Float unitCost, String isbn) {
-        Book book = new Book();
-        book.setTitle(title);
-        book.setDescription(description);
-        book.setUnitCost(unitCost);
-        book.setIsbn(isbn);
-        return createBook(book);
+    public BookService(EntityManager entityManager, EntityTransaction trasaction) {
+       super(entityManager, trasaction);
     }
 
     public Book createBook(Book book) {
-        // transaction
-        transaction.begin();
-        entityManager.persist(book);
-        transaction.commit();
+        try {
+            transaction.begin();
+            entityManager.persist(book);
+            transaction.commit();
+        } catch (Exception e) {
+            transaction.rollback();
+        }
         return book;
     }
 
     public Book findBook(Long id) {
-       return entityManager.find(Book.class, id);
+        Book book = null;
+        try {
+            book = entityManager.find(Book.class, id);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, e.getMessage());
+            transaction.rollback();
+        }
+        return book;
     }
 
     public void removeBook(Long id) {
-        Book book = entityManager.find(Book.class, id);
-        if(book != null) {
-            transaction.begin();
-            entityManager.remove(book);
-            transaction.commit();
+        try {
+            Book book = entityManager.find(Book.class, id);
+            if (book != null) {
+                transaction.begin();
+                entityManager.remove(book);
+                transaction.commit();
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, e.getMessage());
+            transaction.rollback();
         }
     }
 
     public void removeBook(Book book) {
-        // put the book entity in the managed context by first merging, then remove
-        transaction.begin();
-        entityManager.merge(book);
-        entityManager.remove(book);
-        transaction.commit();
+        try {
+            // put the book entity in the managed context by first merging, then remove
+            transaction.begin();
+            entityManager.merge(book);
+            entityManager.remove(book);
+            transaction.commit();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, e.getMessage());
+            transaction.rollback();
+        }
+
     }
 
     public Book raiseUnitCost(Long id, Float raise) {
-        Book book = entityManager.find(Book.class, id);
-        if(book != null) {
-            transaction.begin();
-            book.setUnitCost(book.getUnitCost() + raise);
-            transaction.commit();
+        Book book = null;
+        try {
+            book = entityManager.find(Book.class, id);
+            if (book != null) {
+                transaction.begin();
+                book.setUnitCost(book.getUnitCost() + raise);
+                transaction.commit();
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, e.getMessage());
+            transaction.rollback();
         }
         return book;
     }
 
     public Book raiseUnitCost(Book book, Float raise) {
-        Book mergedBook = entityManager.merge(book);
-        transaction.begin();
-        mergedBook.setUnitCost(mergedBook.getUnitCost() + raise);
-        transaction.commit();
+        try {
+            Book mergedBook = entityManager.merge(book);
+            transaction.begin();
+            mergedBook.setUnitCost(mergedBook.getUnitCost() + raise);
+            transaction.commit();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, e.getMessage());
+            transaction.rollback();
+        }
         return book;
     }
-
-
 
 }
